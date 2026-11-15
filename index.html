@@ -3,61 +3,865 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>МЭШ Дневник — Релизы</title>
+    <title>МЭШ Дневник — Твой карманный помощник</title>
+    <meta name="description" content="Официальный сайт приложения МЭШ Дневник. Расписание, оценки, ИИ-помощник и многое другое.">
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #16111f;
-            color: #ede9fe;
+        /* =========================================
+           ПЕРЕМЕННЫЕ И БАЗОВЫЕ СТИЛИ
+           ========================================= */
+        :root {
+            --bg-dark: #0f0a1a;
+            --bg-light: #1a1128;
+            --primary: #8b5cf6;
+            --primary-glow: #a78bfa;
+            --accent: #7dd3fc;
+            --text-main: #ede9fe;
+            --text-muted: #9b8fc0;
+            --card-bg: rgba(42, 29, 64, 0.6);
+            --card-border: rgba(139, 92, 246, 0.2);
+            --font-main: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        * {
             margin: 0;
-            padding: 40px 20px;
-            text-align: center;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
         }
-        h1 {
-            font-size: 36px;
-            color: #a78bfa;
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.15), transparent 40%),
+                              radial-gradient(circle at 85% 30%, rgba(125, 211, 252, 0.1), transparent 40%);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
         }
-        .release-card {
-            background: #221833;
-            border: 1px solid #332548;
-            border-radius: 16px;
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 600px;
-            text-align: left;
+
+        /* =========================================
+           АНИМИРОВАННЫЙ ФОН (CANVAS)
+           ========================================= */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
         }
-        .release-card h2 {
-            margin: 0 0 10px 0;
-            color: #7dd3fc;
+
+        /* =========================================
+           НАВИГАЦИЯ
+           ========================================= */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 10, 26, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            transition: all 0.3s ease;
         }
-        .release-card p {
-            margin: 5px 0;
-            color: #9b8fc0;
+
+        nav.scrolled {
+            padding: 15px 50px;
+            background: rgba(15, 10, 26, 0.95);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-        .release-card a {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: #8b5cf6;
-            color: white;
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-main);
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
+            letter-spacing: 1px;
         }
-        .release-card a:hover {
-            background: #a78bfa;
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-glow);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .btn-nav {
+            background: var(--primary);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-nav:hover {
+            background: var(--primary-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+        }
+
+        /* =========================================
+           HERO SECTION (ГЛАВНЫЙ ЭКРАН)
+           ========================================= */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 100px 20px;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 20px;
+            color: var(--primary-glow);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .hero h1 {
+            font-size: 72px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff 0%, var(--primary-glow) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            animation: fadeInUp 1s ease 0.6s both;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            padding: 16px 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        /* =========================================
+           СЕКЦИИ (ОБЩИЕ СТИЛИ)
+           ========================================= */
+        section {
+            padding: 120px 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+
+        .section-title h2 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        .section-title p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Анимация появления при скролле */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* =========================================
+           ФУНКЦИИ (FEATURES)
+           ========================================= */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--primary-glow);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            color: var(--primary-glow);
+            font-size: 28px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 15px;
+            position: relative;
+            z-index: 1;
+            line-height: 1.7;
+        }
+
+        /* =========================================
+           СКРИНШОТЫ
+           ========================================= */
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            align-items: center;
+        }
+
+        .screenshot-item {
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transition: transform 0.4s ease;
+            position: relative;
+        }
+
+        .screenshot-item:hover {
+            transform: scale(1.03);
+        }
+
+        .screenshot-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .screenshot-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        /* =========================================
+           АДМИН-ПАНЕЛЬ (СЕКЦИЯ)
+           ========================================= */
+        .admin-section {
+            background: linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.05), transparent);
+        }
+
+        .admin-container {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+        }
+
+        .admin-text {
+            flex: 1;
+        }
+
+        .admin-text h2 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .admin-text ul {
+            list-style: none;
+            margin-top: 30px;
+        }
+
+        .admin-text li {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: var(--text-main);
+        }
+
+        .admin-text li::before {
+            content: '✓';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--primary-glow);
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .admin-visual {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .admin-card {
+            background: var(--card-bg);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.2);
+            position: relative;
+        }
+
+        .admin-card h4 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--primary-glow);
+        }
+
+        .admin-card .mock-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .admin-card .mock-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* =========================================
+           FAQ
+           ========================================= */
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        .faq-question {
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .faq-question span {
+            font-size: 24px;
+            color: var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            padding: 0 30px;
+            overflow: hidden;
+            color: var(--text-muted);
+            transition: all 0.4s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            padding: 0 30px 25px 30px;
+        }
+
+        .faq-item.active .faq-question span {
+            transform: rotate(45deg);
+        }
+
+        /* =========================================
+           FOOTER
+           ========================================= */
+        footer {
+            padding: 60px 20px 30px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        footer a {
+            color: var(--primary-glow);
+            text-decoration: none;
+        }
+
+        /* =========================================
+           АНИМАЦИИ KEYFRAMES
+           ========================================= */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* =========================================
+           АДАПТИВНОСТЬ
+           ========================================= */
+        @media (max-width: 768px) {
+            nav { padding: 15px 20px; }
+            .nav-links { display: none; }
+            .hero h1 { font-size: 42px; }
+            .hero p { font-size: 16px; }
+            .hero-buttons { flex-direction: column; }
+            .admin-container { flex-direction: column; }
+            .section-title h2 { font-size: 32px; }
+            .features-grid, .screenshots-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <h1>МЭШ Дневник</h1>
-    <p>Официальные релизы приложения</p>
 
-    <div class="release-card">
-        <h2>Версия 4.1</h2>
-        <p>Новое: админ-панель, объявления, исправления багов.</p>
-        <a href="https://github.com/idk1365/MESH/releases/latest" target="_blank">Скачать</a>
-    </div>
+    <!-- Фоновые частицы -->
+    <canvas id="particle-canvas"></canvas>
 
+    <!-- Навигация -->
+    <nav id="navbar">
+        <a href="#" class="logo">
+            <!-- Место для логотипа, если не загрузишь картинку, покажет текст -->
+            <img src="images/logo.png" alt="Logo" onerror="this.style.display='none'">
+            <span>МЭШ</span> Дневник
+        </a>
+        <div class="nav-links">
+            <a href="#features">Функции</a>
+            <a href="#screenshots">Скриншоты</a>
+            <a href="#admin">Админ-панель</a>
+            <a href="#faq">FAQ</a>
+        </div>
+        <a href="https://github.com/idk1365/MESH/releases/latest" class="btn-nav" target="_blank">Скачать</a>
+    </nav>
+
+    <!-- Главный экран -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">✨ Версия 4.1 уже доступна</div>
+            <h1>Твой дневник.<br>Твои правила.</h1>
+            <p>Мощное десктопное приложение для МЭШ. Расписание, оценки, встроенный ИИ-помощник и поддержка ЦДЗ в одном месте.</p>
+            <div class="hero-buttons">
+                <a href="https://github.com/idk1365/MESH/releases/latest" class="btn-primary" target="_blank">
+                    Скачать для Windows
+                </a>
+                <a href="#features" class="btn-secondary">Узнать больше</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Функции -->
+    <section id="features">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Всё, что нужно</h2>
+                <p>Мы объединили лучшие инструменты для учёбы в одном приложении.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📅</div>
+                    <h3>Умное расписание</h3>
+                    <p>Просматривай расписание на две недели вперёд. Удобные плашки дней, информация о кабинетах и заменах.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📊</div>
+                    <h3>Оценки и аналитика</h3>
+                    <p>Следи за своими оценками, средними баллами по предметам и динамикой роста в реальном времени.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🤖</div>
+                    <h3>Встроенный ИИ-помощник</h3>
+                    <p>Застрял на домашке? Наш ИИ (на базе GigaChat) проанализирует задание и поможет найти решение.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📚</div>
+                    <h3>Помощь с ЦДЗ</h3>
+                    <p>Встроенный браузер для цифровых заданий. Автоматическое извлечение текста задания для ИИ.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Живые темы</h3>
+                    <p>Выбирай из нескольких тем оформления, включая эксклюзивные видео-фоны (Морская и Зимняя).</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Безопасность</h3>
+                    <p>Твой токен хранится локально в зашифрованном виде и никуда не передаётся. Полный контроль.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Скриншоты -->
+    <section id="screenshots">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Выглядит потрясающе</h2>
+                <p>Минималистичный дизайн, который не отвлекает от главного.</p>
+            </div>
+            <div class="screenshots-grid">
+                <div class="screenshot-item fade-in">
+                    <img src="images/screenshot1.png" alt="Интерфейс дневника" onerror="this.src='https://via.placeholder.com/800x500/1a1128/a78bfa?text=Скриншот+Дневника'">
+                </div>
+                <div class="screenshot-item fade-in">
+                    <img src="images/screenshot2.png" alt="Интерфейс ИИ-помощника" onerror="this.src='https://via.placeholder.com/800x500/1a1128/7dd3fc?text=Скриншот+ИИ'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Админ-панель -->
+    <section id="admin" class="admin-section">
+        <div class="container admin-container">
+            <div class="admin-text fade-in">
+                <h2>Скрытая админ-панель</h2>
+                <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 20px;">
+                    Для разработчиков и администраторов предусмотрен секретный доступ.
+                </p>
+                <ul>
+                    <li>Включение режима технических работ</li>
+                    <li>Создание объявлений с картинками и Markdown</li>
+                    <li>Секретный код для активации Developer Mode в ИИ</li>
+                </ul>
+            </div>
+            <div class="admin-visual fade-in">
+                <div class="admin-card">
+                    <h4>Вход в систему</h4>
+                    <div class="mock-input">Пароль: ••••••••••••</div>
+                    <button class="mock-btn">Активировать</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Частые вопросы</h2>
+            </div>
+            <div class="faq-list fade-in">
+                <div class="faq-item">
+                    <div class="faq-question">Где взять токен для входа? <span>+</span></div>
+                    <div class="faq-answer">Зайди на dnevnik.mos.ru, открой DevTools (F12), перейди во вкладку Application -> Cookies, найди AUPD_TOKEN и скопируй его значение.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Это безопасно? <span>+</span></div>
+                    <div class="faq-answer">Да. Все данные хранятся только на твоём компьютере. Приложение не отправляет твои личные данные третьим лицам.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Как работает ИИ-помощник? <span>+</span></div>
+                    <div class="faq-answer">Приложение отправляет текст задания на защищённый сервер, который обращается к GigaChat. Твой токен и личные данные при этом не передаются.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Почему видео-темы могут тормозить? <span>+</span></div>
+                    <div class="faq-answer">Видео-фоны требуют ресурсов GPU. Если у тебя слабый компьютер, мы рекомендуем использовать обычные статические темы.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Подвал -->
+    <footer>
+        <p>&copy; 2026 МЭШ Дневник. Сделано с ❤️ для учеников.</p>
+        <p style="margin-top: 10px;">
+            <a href="https://github.com/idk1365/MESH">GitHub Repository</a> • 
+            <a href="https://github.com/idk1365/MESH/issues">Сообщить об ошибке</a>
+        </p>
+    </footer>
+
+    <!-- =========================================
+         JAVASCRIPT
+         ========================================= -->
+    <script>
+        // 1. Анимация частиц на фоне
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.color = Math.random() > 0.5 ? 'rgba(139, 92, 246, 0.5)' : 'rgba(125, 211, 252, 0.5)';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.floor(window.innerWidth / 15);
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // 2. Навигация при скролле
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // 3. Появление элементов при скролле (Intersection Observer)
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // 4. Аккордеон FAQ
+        document.querySelectorAll('.faq-question').forEach(item => {
+            item.addEventListener('click', () => {
+                const parent = item.parentElement;
+                parent.classList.toggle('active');
+            });
+        });
+    </script>
 </body>
 </html>
