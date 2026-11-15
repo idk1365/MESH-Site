@@ -404,34 +404,37 @@
         }
 
         /* =========================================
-           АДМИН-ПАНЕЛЬ (СЕКЦИЯ)
+           СЕКЦИЯ ИИ-ПОМОЩНИКА
            ========================================= */
-        .admin-section {
+        .ai-section {
             background: linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.05), transparent);
         }
 
-        .admin-container {
+        .ai-container {
             display: flex;
             align-items: center;
             gap: 60px;
         }
 
-        .admin-text {
+        .ai-text {
             flex: 1;
         }
 
-        .admin-text h2 {
+        .ai-text h2 {
             font-size: 42px;
             font-weight: 800;
             margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--text-main), var(--primary-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .admin-text ul {
+        .ai-text ul {
             list-style: none;
             margin-top: 30px;
         }
 
-        .admin-text li {
+        .ai-text li {
             display: flex;
             align-items: center;
             gap: 15px;
@@ -440,63 +443,123 @@
             color: var(--text-main);
         }
 
-        .admin-text li::before {
-            content: '✓';
+        .ai-text li::before {
+            content: '✨';
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            background: rgba(139, 92, 246, 0.2);
+            width: 32px;
+            height: 32px;
+            background: rgba(139, 92, 246, 0.15);
             color: var(--primary-glow);
-            border-radius: 50%;
-            font-weight: bold;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 16px;
             flex-shrink: 0;
         }
 
-        .admin-visual {
+        .ai-visual {
             flex: 1;
             display: flex;
             justify-content: center;
+            perspective: 1000px;
         }
 
-        .admin-card {
+        /* Макет чата */
+        .chat-mockup {
             background: var(--card-bg);
             border: 1px solid var(--primary);
-            border-radius: 20px;
-            padding: 30px;
+            border-radius: 24px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 0 40px rgba(139, 92, 246, 0.2);
-            position: relative;
+            max-width: 420px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(139, 92, 246, 0.15);
+            transform: rotateY(-5deg) rotateX(5deg);
+            transition: transform 0.5s ease;
+            overflow: hidden;
         }
 
-        .admin-card h4 {
-            font-size: 20px;
-            margin-bottom: 20px;
+        .chat-mockup:hover {
+            transform: rotateY(0deg) rotateX(0deg);
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
             color: var(--primary-glow);
         }
 
-        .admin-card .mock-input {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 15px;
-            color: var(--text-muted);
-            font-family: monospace;
+        .chat-header::before {
+            content: '🤖';
+            font-size: 20px;
         }
 
-        .admin-card .mock-btn {
+        .chat-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-image: radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.05), transparent 50%);
+        }
+
+        .chat-message {
+            padding: 15px 20px;
+            border-radius: 16px;
+            max-width: 85%;
+            font-size: 15px;
+            line-height: 1.5;
+            animation: fadeInUp 0.5s ease both;
+        }
+
+        .chat-message.user {
             background: var(--primary);
             color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            width: 100%;
-            font-weight: bold;
-            cursor: pointer;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.ai {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-input-mock {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-mock .input-field {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 10px 15px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .chat-input-mock .send-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
         }
 
         /* =========================================
@@ -588,22 +651,20 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-
         /* =========================================
            АДАПТИВНОСТЬ
            ========================================= */
+        @media (max-width: 900px) {
+            .ai-container { flex-direction: column; }
+            .chat-mockup { transform: none; height: 400px; }
+        }
+
         @media (max-width: 768px) {
             nav { padding: 15px 20px; }
             .nav-links { display: none; }
             .hero h1 { font-size: 42px; }
             .hero p { font-size: 16px; }
             .hero-buttons { flex-direction: column; }
-            .admin-container { flex-direction: column; }
             .section-title h2 { font-size: 32px; }
             .features-grid, .screenshots-grid { grid-template-columns: 1fr; }
         }
@@ -617,14 +678,13 @@
     <!-- Навигация -->
     <nav id="navbar">
         <a href="#" class="logo">
-            <!-- Место для логотипа, если не загрузишь картинку, покажет текст -->
             <img src="images/logo.png" alt="Logo" onerror="this.style.display='none'">
             <span>МЭШ</span> Дневник
         </a>
         <div class="nav-links">
             <a href="#features">Функции</a>
             <a href="#screenshots">Скриншоты</a>
-            <a href="#admin">Админ-панель</a>
+            <a href="#ai">ИИ-Помощник</a>
             <a href="#faq">FAQ</a>
         </div>
         <a href="https://github.com/idk1365/MESH/releases/latest" class="btn-nav" target="_blank">Скачать</a>
@@ -705,25 +765,32 @@
         </div>
     </section>
 
-    <!-- Админ-панель -->
-    <section id="admin" class="admin-section">
-        <div class="container admin-container">
-            <div class="admin-text fade-in">
-                <h2>Скрытая админ-панель</h2>
+    <!-- Секция ИИ -->
+    <section id="ai" class="ai-section">
+        <div class="container ai-container">
+            <div class="ai-text fade-in">
+                <h2>Твой личный ИИ-репетитор</h2>
                 <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 20px;">
-                    Для разработчиков и администраторов предусмотрен секретный доступ.
+                    Мы встроили нейросеть прямо в дневник. Она знает твоё расписание, оценки и готова прийти на помощь в любую минуту.
                 </p>
                 <ul>
-                    <li>Включение режима технических работ</li>
-                    <li>Создание объявлений с картинками и Markdown</li>
-                    <li>Секретный код для активации Developer Mode в ИИ</li>
+                    <li>Анализ домашних заданий</li>
+                    <li>Помощь с ЦДЗ по тексту или скриншоту</li>
+                    <li>Секретный "Режим разработчика" (Dev Mode)</li>
                 </ul>
             </div>
-            <div class="admin-visual fade-in">
-                <div class="admin-card">
-                    <h4>Вход в систему</h4>
-                    <div class="mock-input">Пароль: ••••••••••••</div>
-                    <button class="mock-btn">Активировать</button>
+            <div class="ai-visual fade-in">
+                <div class="chat-mockup">
+                    <div class="chat-header">ИИ-Помощник</div>
+                    <div class="chat-body">
+                        <div class="chat-message user">Помоги с задачей по геометрии, я не понимаю как найти площадь трапеции.</div>
+                        <div class="chat-message ai">Без проблем! Площадь трапеции вычисляется по формуле: S = ((a + b) / 2) * h, где a и b — основания, а h — высота. Скинь скриншот задания, и я помогу посчитать!</div>
+                        <div class="chat-message user">Спасибо, уже понял!</div>
+                    </div>
+                    <div class="chat-input-mock">
+                        <div class="input-field">Спроси что-нибудь...</div>
+                        <div class="send-btn">➤</div>
+                    </div>
                 </div>
             </div>
         </div>
